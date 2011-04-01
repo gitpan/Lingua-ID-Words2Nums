@@ -1,6 +1,6 @@
 package Lingua::ID::Words2Nums;
 BEGIN {
-  $Lingua::ID::Words2Nums::VERSION = '0.02';
+  $Lingua::ID::Words2Nums::VERSION = '0.11';
 }
 # ABSTRACT: Convert Indonesian verbage to number
 
@@ -220,7 +220,7 @@ Lingua::ID::Words2Nums - Convert Indonesian verbage to number
 
 =head1 VERSION
 
-version 0.02
+version 0.11
 
 =head1 SYNOPSIS
 

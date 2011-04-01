@@ -2,7 +2,7 @@ NAME
     Lingua::ID::Words2Nums - Convert Indonesian verbage to number
 
 VERSION
-    version 0.02
+    version 0.11
 
 SYNOPSIS
      use Lingua::ID::Words2Nums qw(words2nums words2nums_simple);
