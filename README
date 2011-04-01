@@ -1,34 +1,44 @@
+NAME
+    Lingua::ID::Words2Nums - Convert Indonesian verbage to number
 
-                                     NAME
-                                       
-   Lingua::ID::Words2Nums - convert Indonesian verbage to number.
-     _________________________________________________________________
-   
-                                   SYNOPSIS
-                                       
-  use Lingua::ID::Words2Nums ;
+VERSION
+    version 0.02
 
-  print words2nums("seratus dua puluh tiga") ; # 123
-  print words2nums_simple("satu dua tiga") ;   # 123
-     _________________________________________________________________
-   
-                                  DESCRIPTION
-                                       
-   words2nums currently can handle real numbers in normal and scientific
-   form in the order of hundreds of trillions.
-   
-   words2nums will return undef is its argument contains unknown verbage
-   or ``syntax error''.
-   
-   words2nums will produce unexpected result if you feed it stupid
-   verbage.
-     _________________________________________________________________
-   
-                                    AUTHOR
-                                       
-   Steven Haryanto <sh@hhh.indoglobal.com>
-     _________________________________________________________________
-   
-                                   SEE ALSO
-                                       
-   Lingua::ID::Nums2Words
+SYNOPSIS
+     use Lingua::ID::Words2Nums qw(words2nums words2nums_simple);
+
+     print words2nums("seratus dua puluh tiga"); # 123
+     print words2nums_simple("satu dua tiga");   # 123
+
+DESCRIPTION
+    This module provides two functions, words2nums and words2nums_simple.
+    They are the counterpart of Lingua::ID::Nums2Words's nums2words and
+    <nums2words_simple>.
+
+  FUNCTIONS
+    None are exported, but they are exportable.
+
+  words2nums(STR) => NUM|undef
+    Parse Indonesian verbage and return number, or undef if failed (unknown
+    verbage or 'syntax error'). In English, this is equivalent to converting
+    "one hundred and twenty three" to 123. Currently can handle real numbers
+    in normal and scientific form in the order of hundreds of trillions.
+
+    Will produce unexpected result if you feed it stupid verbage.
+
+  words2nums_simple(STR) => NUM|undef
+    Like words2nums, but can only handle spelled digits (like "one two
+    three" => 123 in English).
+
+SEE ALSO
+    Lingua::ID::Nums2Words
+
+AUTHOR
+    Steven Haryanto <stevenharyanto@gmail.com>
+
+COPYRIGHT AND LICENSE
+    This software is copyright (c) 2011 by Steven Haryanto.
+
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as the Perl 5 programming language system itself.
+
