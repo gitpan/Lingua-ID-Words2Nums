@@ -1,11 +1,20 @@
 Revision history for Lingua-ID-Words2Nums.
 
+0.12     2011-09-15
+
+         [ENHANCEMENTS]
+
+         Handle mixture of numbers and words (e.g. '1,5 juta 13 ribu' ->
+         1513000).
+
+
 0.11     2011-04-01
 
          [ETC]
 
-         - jump version, because old 0.01 version turned out set $VERSION to
-           0.1, so PAUSE requires new version to be larger than that.
+         - bump version to 0.11, because old 0.01 version turned out set
+           $VERSION to 0.1, so PAUSE requires new version to be larger than
+           that.
 
 
 0.02     2011-04-01

@@ -1,13 +1,11 @@
 package Lingua::ID::Words2Nums;
-BEGIN {
-  $Lingua::ID::Words2Nums::VERSION = '0.11';
-}
-# ABSTRACT: Convert Indonesian verbage to number
 
 use 5.010;
 use strict;
 use warnings;
 #use Log::Any qw($log);
+
+our $VERSION = '0.12'; # VERSION
 
 require Exporter;
 our @ISA       = qw(Exporter);
@@ -21,6 +19,9 @@ use vars qw(
                $Exp_pat
                $Dec_pat
        );
+
+use Parse::Number::ID qw(parse_number_id);
+use Scalar::Util qw(looks_like_number);
 
 %Digits = (
     nol => 0, kosong => 0,
@@ -61,7 +62,7 @@ sub _handle_exp($) {
     my $words = lc shift;
     my ($num1, $num2);
 
-    if( $words =~ /(.+)\b$Exp_pat\b(.+)/ ) {
+    if( $words =~ /(.+)\s+$Exp_pat\s+(.+)/ ) {
         #$log->trace("it's an exponent");
         $num1 = _handle_neg($1);
         $num2 = _handle_neg($2);
@@ -81,7 +82,7 @@ sub _handle_neg($) {
     my $words = lc shift;
     my $num1;
 
-    if( $words =~ /^[\s\t]*$Neg_pat\b(.+)/ ) {
+    if( $words =~ /^\s*$Neg_pat\s+(.+)/ ) {
         #$log->trace("it's negative");
         $num1 = -_handle_dec($1);
         not defined $num1 and return undef;
@@ -100,12 +101,12 @@ sub _handle_dec($) {
     my $words = lc shift;
     my ($num1, $num2);
 
-    if( $words =~ /(.+)\b$Dec_pat\b(.+)/ ) {
-        #$log->trace("it has decimals");
+    if( $words =~ /(.+)\s+$Dec_pat\s+(.+)/ ) {
+        #$log->trace("it has decimals (\$1=$1, \$2=$2)");
         $num1 = _handle_int($1);
         $num2 = _handle_simple($2);
-        !defined($num1) || !defined($num2) and return undef;
         #$log->trace("num1 is $num1, num2 is $num2");
+        !defined($num1) || !defined($num2) and return undef;
         return $num1 + ("0.".$num2);
     } else {
         #$log->trace("it's an integer");
@@ -133,6 +134,13 @@ sub _handle_int($) {
             #$log->trace("saw a digit: $w");
             $seen_digits and do { push @nums, ((10 * (pop @nums)) + $Digits{$w}) }
                 or do { push @nums, $Digits{$w}; $seen_digits = 1 }
+        }
+
+        elsif ( looks_like_number $w ) { # digits (satuan) as number
+            #$log->trace("saw a number: $w");
+            return undef if $seen_digits; # 1 <spc> 2 is considered an error
+            push @nums, $w;
+            $seen_digits = 1;
         }
 
         elsif( $w eq 'belas' ) { # special case, teens (belasan)
@@ -174,8 +182,12 @@ sub _handle_simple($) {
 
     $num = "";
     for $w (@words) {
-        not defined $Digits{$w} and return undef;
-        $num .= $Digits{$w};
+        if (looks_like_number $w) {
+            $num .= $w;
+        } else {
+            not defined $Digits{$w} and return undef;
+            $num .= $Digits{$w};
+        }
     }
 
     $num;
@@ -189,9 +201,19 @@ sub _split_it($) {
     my @words = ();
     my $w;
 
-    for $w ($words =~ /\b(\w+)\b/g) {
+    for $w (split /\s+/, $words) {
         ##$log->trace("saw $w");
-        if( $w =~ /^se(.+)$/ and defined $Words{$1} ) {
+        if ($w =~ /^([-+]?[0-9.,]+)(\D?.*)$/) {
+            my ($n0, $w2) = ($1, $2);
+            my $n = parse_number_id(text => $w);
+            unless (defined $n) {
+                unshift @words, 'ERR';
+                last;
+            }
+            push @words, $n;
+            push @words, $w2 if length($w2);
+        }
+        elsif( $w =~ /^se(.+)$/ and defined $Words{$1} ) {
             #$log->trace("i should split $w");
             push @words, 'se', $1 }
         elsif( $w =~ /^(.+)(belas|puluh|ratus|ribu|juta|mil[iy]ard?|tril[iy]un)$/ and defined $Words{$1} ) {
@@ -210,6 +232,7 @@ sub _split_it($) {
 }
 
 1;
+# ABSTRACT: Convert Indonesian verbage to number
 
 
 =pod
@@ -220,7 +243,7 @@ Lingua::ID::Words2Nums - Convert Indonesian verbage to number
 
 =head1 VERSION
 
-version 0.11
+version 0.12
 
 =head1 SYNOPSIS
 
@@ -228,12 +251,14 @@ version 0.11
 
  print words2nums("seratus dua puluh tiga"); # 123
  print words2nums_simple("satu dua tiga");   # 123
+ print words2nums("3 juta 100 ribu");        # 3100000
+ print words2nums("1,605 juta");             # 1605000
 
 =head1 DESCRIPTION
 
 This module provides two functions, B<words2nums> and B<words2nums_simple>. They
 are the counterpart of L<Lingua::ID::Nums2Words>'s B<nums2words> and
-<nums2words_simple>.
+B<nums2words_simple>.
 
 =head2 FUNCTIONS
 

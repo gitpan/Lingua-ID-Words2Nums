@@ -2,18 +2,20 @@ NAME
     Lingua::ID::Words2Nums - Convert Indonesian verbage to number
 
 VERSION
-    version 0.11
+    version 0.12
 
 SYNOPSIS
      use Lingua::ID::Words2Nums qw(words2nums words2nums_simple);
 
      print words2nums("seratus dua puluh tiga"); # 123
      print words2nums_simple("satu dua tiga");   # 123
+     print words2nums("3 juta 100 ribu");        # 3100000
+     print words2nums("1,605 juta");             # 1605000
 
 DESCRIPTION
     This module provides two functions, words2nums and words2nums_simple.
     They are the counterpart of Lingua::ID::Nums2Words's nums2words and
-    <nums2words_simple>.
+    nums2words_simple.
 
   FUNCTIONS
     None are exported, but they are exportable.
