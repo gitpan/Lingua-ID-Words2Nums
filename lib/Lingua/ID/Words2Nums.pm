@@ -5,7 +5,7 @@ use strict;
 use warnings;
 #use Log::Any qw($log);
 
-our $VERSION = '0.12'; # VERSION
+our $VERSION = '0.13'; # VERSION
 
 require Exporter;
 our @ISA       = qw(Exporter);
@@ -150,8 +150,9 @@ sub _handle_int($) {
             $seen_digits = 0;
         }
 
-        else{ # must be a multiplier
+        else{ # must be a multiplier, or unknown
             #$log->trace( "saw a multiplier: $w");
+            return undef unless defined $Mults{$w}; # unknown word
             return undef unless @nums; # mistake in writing tens/multiplier
 
             $a = 0; $subtot = 0;
@@ -203,9 +204,10 @@ sub _split_it($) {
 
     for $w (split /\s+/, $words) {
         ##$log->trace("saw $w");
-        if ($w =~ /^([-+]?[0-9.,]+)(\D?.*)$/) {
+        if ($w =~ /^([-+]?[0-9.,]+(?:[Ee][+-]?\d+)?)(\D?.*)$/) {
             my ($n0, $w2) = ($1, $2);
-            my $n = parse_number_id(text => $w);
+            #print "n0=$n0, w2=$w2\n";
+            my $n = parse_number_id(text => $n0);
             unless (defined $n) {
                 unshift @words, 'ERR';
                 last;
@@ -228,31 +230,34 @@ sub _split_it($) {
         }
     }
 
+    #use Data::Dump; dd \@words;
     @words;
 }
 
 1;
-# ABSTRACT: Convert Indonesian verbage to number
+# ABSTRACT: Convert Indonesian words (or mixture of numbers and words) to number
 
 
 =pod
 
 =head1 NAME
 
-Lingua::ID::Words2Nums - Convert Indonesian verbage to number
+Lingua::ID::Words2Nums - Convert Indonesian words (or mixture of numbers and words) to number
 
 =head1 VERSION
 
-version 0.12
+version 0.13
 
 =head1 SYNOPSIS
 
  use Lingua::ID::Words2Nums qw(words2nums words2nums_simple);
 
- print words2nums("seratus dua puluh tiga"); # 123
- print words2nums_simple("satu dua tiga");   # 123
- print words2nums("3 juta 100 ribu");        # 3100000
+ print words2nums("seratus tiga koma dua");  # 103.2
+ print words2nums("minus 3 juta 100 ribu");  # 3100000
  print words2nums("1,605 juta");             # 1605000
+ print words2nums("-1,3e4");                 # 13000
+
+ print words2nums_simple("satu dua tiga");   # 123
 
 =head1 DESCRIPTION
 

@@ -12,18 +12,18 @@ my %module_build_args = (
   'configure_requires' => {
     'Module::Build' => '0.3601'
   },
-  'dist_abstract' => 'Convert Indonesian verbage to number',
+  'dist_abstract' => 'Convert Indonesian words (or mixture of numbers and words) to number',
   'dist_author' => [
     'Steven Haryanto <stevenharyanto@gmail.com>'
   ],
   'dist_name' => 'Lingua-ID-Words2Nums',
-  'dist_version' => '0.12',
+  'dist_version' => '0.13',
   'license' => 'perl',
   'module_name' => 'Lingua::ID::Words2Nums',
   'recommends' => {},
   'recursive_test_files' => 1,
   'requires' => {
-    'Parse::Number::ID' => '0',
+    'Parse::Number::ID' => '0.02',
     'perl' => '5.010000'
   },
   'script_files' => []
