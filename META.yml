@@ -1,5 +1,5 @@
 ---
-abstract: 'Convert Indonesian words (or mixture of numbers and words) to number'
+abstract: 'Convert Indonesian verbage to number'
 author:
   - 'Steven Haryanto <stevenharyanto@gmail.com>'
 build_requires:
@@ -14,9 +14,9 @@ meta-spec:
   version: 1.4
 name: Lingua-ID-Words2Nums
 requires:
-  Parse::Number::ID: 0.02
+  Parse::Number::ID: 0.03
   perl: 5.010000
 resources:
   homepage: http://search.cpan.org/dist/Lingua-ID-Words2Nums/
   repository: http://github.com/sharyanto/perl-Lingua-ID-Words2Nums
-version: 0.13
+version: 0.14

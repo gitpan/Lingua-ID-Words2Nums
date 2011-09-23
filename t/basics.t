@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Test::More;
 
-use Lingua::ID::Words2Nums qw(words2nums words2nums_simple);
+use Lingua::ID::Words2Nums qw(words2nums words2nums_simple $Pat);
 
 my %test_n2w = (
     0 => "nol",
@@ -18,6 +18,8 @@ my %test_n2w = (
     11 => "sebelas",
     12 => "dua belas",
     13 => "3belas",
+    18 => "lapan belas", # singkatan
+    19 => "smbln bls", # singkatan
     14.23 => "14.23",
     -14.24 => "-14.24",
     15.24 => "1,524e+1",
@@ -43,6 +45,7 @@ my %test_n2w = (
         "empat ratus lima puluh enam ribu tujuh ratus delapan puluh sembilan",
     -4000000000000 => "negatif empat triliun",
     994000000000000 => "sembilan ratus sembilan puluh empat triliun",
+    9100000000000000 => "sembilan kuadriliun seratus triliun",
 
     "5.4e6" => "lima koma empat kali sepuluh pangkat enam",
     "-5.4e6" => "negatif lima koma empat kali sepuluh pangkat enam",
@@ -67,6 +70,27 @@ my %test_n2ws = (
 for (sort {abs($a) <=> abs($b)} keys %test_n2ws) {
     ok(words2nums_simple($test_n2ws{$_}) == $_, "simple: $test_n2ws{$_} => $_")
         or diag "result: ".words2nums_simple($test_n2ws{$_});
+}
+
+my %test_pat = (
+    "enam" => 1,
+    "tujuh puluh tujuh" => 1,
+    "tujuhpuluhtujuh" => 1,
+    "tjhratusratus ratus" => 1,
+    "setujuh" => 0,
+    "se tujuh" => 1,
+    "tujuh rts delapan plh 5" => 1,
+    "7,5 jt rupiah" => 1,
+    "0.51 miliar" => 1,
+);
+
+for (sort keys %test_pat) {
+    my $match = $_ =~ /\b$Pat\b/;
+    if ($test_pat{$_}) {
+        ok($match, "'$_' matches");
+    } else {
+        ok(!$match, "'$_' doesn't match");
+    }
 }
 
 done_testing();
