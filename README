@@ -2,7 +2,7 @@ NAME
     Lingua::ID::Words2Nums - Convert Indonesian verbage to number
 
 VERSION
-    version 0.14
+    version 0.15
 
 SYNOPSIS
      use Lingua::ID::Words2Nums qw(words2nums words2nums_simple);
@@ -27,21 +27,6 @@ VARIABLES
     a string of words. It's not perfect (the extracted verbage might not be
     valid, e.g. "ribu tiga"), but it's simple and fast.
 
-  FUNCTIONS
-    None are exported, but they are exportable.
-
-  words2nums(STR) => NUM|undef
-    Parse Indonesian verbage and return number, or undef if failed (unknown
-    verbage or 'syntax error'). In English, this is equivalent to converting
-    "one hundred and twenty three" to 123. Currently can handle real numbers
-    in normal and scientific form in the order of hundreds of trillions.
-
-    Will produce unexpected result if you feed it stupid verbage.
-
-  words2nums_simple(STR) => NUM|undef
-    Like words2nums, but can only handle spelled digits (like "one two
-    three" => 123 in English).
-
 SEE ALSO
     Lingua::ID::Nums2Words
 
@@ -51,7 +36,7 @@ AUTHOR
     Steven Haryanto <stevenharyanto@gmail.com>
 
 COPYRIGHT AND LICENSE
-    This software is copyright (c) 2011 by Steven Haryanto.
+    This software is copyright (c) 2012 by Steven Haryanto.
 
     This is free software; you can redistribute it and/or modify it under
     the same terms as the Perl 5 programming language system itself.
