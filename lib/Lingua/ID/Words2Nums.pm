@@ -1,11 +1,12 @@
 package Lingua::ID::Words2Nums;
 
-use 5.010;
+our $DATE = '2014-09-28'; # DATE
+our $VERSION = '0.16'; # VERSION
+
+use 5.010001;
 use strict;
 use warnings;
 #use Log::Any qw($log);
-
-our $VERSION = '0.15'; # VERSION
 
 our %SPEC;
 
@@ -29,7 +30,7 @@ my %Digits = (
     sembilan => 9, smbln => 9,
 );
 
-my %Mults = (
+my %Small_Mults = (
     puluh => 1e1, plh => 1e1,
     lusin => 12,
     kodi => 20,
@@ -39,28 +40,32 @@ my %Mults = (
     juta => 1e6, jt => 1e6,
     milyar => 1e9, milyard => 1e9, miliar => 1e9, miliard => 1e9,
     triliun => 1e12, trilyun => 1e12,
+);
 
+my %Big_Mults = (
     # -yun / kw- / etc variants?
     kuadriliun => 1e15,
-    kuintiliun => 18,
-    sekstiliun => 21,
-    septiliun => 24,
-    oktiliun => 27,
-    noniliun => 30,
-    desiliun => 33,
-    undesiliun => 36,
-    duodesiliun => 39,
-    tredesiliun => 42,
-    kuatuordesiliun => 45,
-    kuindesiliun => 48,
-    seksdesiliun => 51,
-    septendesiliun => 54,
-    oktodesiliun => 57,
-    novemdesiliun => 60,
-    vigintiliun => 63,
-    googol => 100, gugol => 100,
-    sentiliun => 303,
+    kuintiliun => 1e18,
+    sekstiliun => 1e21,
+    septiliun => 1e24,
+    oktiliun => 1e27,
+    noniliun => 1e30,
+    desiliun => 1e33,
+    undesiliun => 1e36,
+    duodesiliun => 1e39,
+    tredesiliun => 1e42,
+    kuatuordesiliun => 1e45,
+    kuindesiliun => 1e48,
+    seksdesiliun => 1e51,
+    septendesiliun => 1e54,
+    oktodesiliun => 1e57,
+    novemdesiliun => 1e60,
+    vigintiliun => 1e63,
+    googol => 1e100, gugol => 1e100,
+    sentiliun => 1e303,
 );
+
+my %Mults = (%Small_Mults, %Big_Mults);
 
 my %Teen_Words = (
     belas => 0,
@@ -71,12 +76,22 @@ my %Words = (
     %Digits, %Mults, %Teen_Words,
 );
 
+# doesn't contain big multipliers (usually only used in scientific and not in
+# daily common text)
+my %Words2 = (
+    %Digits, %Small_Mults, %Teen_Words,
+);
+
 my %Se = ("se" => 0, "s" => 0);
 
 # words that can be used with se- (or single digit), e.g. sebelas, tiga belas,
 # sepuluh, seratus, dua ratus, ...
 my %Se_Words = (
     %Mults, %Teen_Words,
+);
+
+my %Se_Words2 = (
+    %Small_Mults, %Teen_Words,
 );
 
 my $Pos_pat  = qr/(?:positif|plus|pos)/;
@@ -89,13 +104,21 @@ my $Mult_pat = "(?:" . join("|", sort keys %Se_Words).")";
 my $Se_pat   = "(?:" . join("|", sort keys %Se).")";
 my $Se_Mult_pat = "(?:(?:" . join("|", sort keys %Se).")".
     "(?:" . join("|", sort keys %Se_Words) . "))";
+my $Se_Mult_pat2 = "(?:(?:" . join("|", sort keys %Se).")".
+    "(?:" . join("|", sort keys %Se_Words2) . "))";
 
-# quick pattern for extracting words ;
-my $_w = "(?:" . join("|", $Se_Mult_pat,
-                      (grep {$_ ne 'se'} sort keys(%Words)),
-                      $Parse::Number::ID::Pat,
-                  ) . ")";
-our $Pat = qr/(?:$_w(?:,?\s*$_w)*)/;
+# quick pattern for extracting words
+# neg_pat? (num + mult)+
+our $Pat = join(
+    "",
+    '(?:(?:', "\n",
+    '  (?:', $Neg_pat, '\s*)?', " # opt: negative\n",
+    '  (?:', '(?:', join("|", sort(keys(%Se),keys(%Digits))), ')|', $Parse::Number::ID::Pat, ')', " # num\n",
+    '  (?:', '\s*', $Dec_pat, '\s*', '(?:', join("|", sort keys %Digits), '\s*)+', ')?', " # opt: decimal\n",
+    '  (?:', '\s*', '(?:', join("|", sort keys %Small_Mults), ')', '){0,3}', " # opt: mult\n",
+    '\s*)+)',
+);
+$Pat  = qr/$Pat/x;
 
 $SPEC{words2nums} = {
     v => 1.1,
@@ -331,8 +354,11 @@ sub _split_it($) {
 1;
 # ABSTRACT: Convert Indonesian verbage to number
 
+__END__
 
 =pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -340,7 +366,7 @@ Lingua::ID::Words2Nums - Convert Indonesian verbage to number
 
 =head1 VERSION
 
-version 0.15
+This document describes version 0.16 of Lingua::ID::Words2Nums (from Perl distribution Lingua-ID-Words2Nums), released on 2014-09-28.
 
 =head1 SYNOPSIS
 
@@ -359,15 +385,69 @@ This module provides two functions, B<words2nums> and B<words2nums_simple>. They
 are the counterpart of L<Lingua::ID::Nums2Words>'s B<nums2words> and
 B<nums2words_simple>.
 
-=head1 VARIABLES
+=head1 FUNCTIONS
+
+
+=head2 words2nums(@args) -> any
+
+Convert Indonesian verbage to number.
+
+Parse Indonesian verbage and return number, or undef if failed (unknown verbage
+or 'syntax error'). In English, this is equivalent to converting "one hundred
+and twenty three" to 123. Currently can handle real numbers in normal and
+scientific form in the order of hundreds of trillions.
+
+Will produce unexpected result if you feed it stupid verbage.
+
+Arguments ('*' denotes required arguments):
+
+=over 4
+
+=item * B<str>* => I<str>
+
+The verbage to convert.
+
+=back
+
+Return value:
+
+ (any)
+
+
+=head2 words2nums_simple(@args) -> any
+
+Like words2nums, but can only parse sequence of digits.
+
+In English, this is equivalent to converting "one two three" to 123.
+
+Will produce unexpected result if you feed it stupid verbage.
+
+Arguments ('*' denotes required arguments):
+
+=over 4
+
+=item * B<str>* => I<str>
+
+The verbage to convert.
+
+=back
+
+Return value:
+
+ (any)
+
+=head1 EXPORTS
 
 None are exported by default, but they are exportable.
 
-=head2 $Pat (REGEX)
+=head2 $Pat (regex)
 
 A regex for quickly matching/extracting verbage from text; it looks for a string
-of words. It's not perfect (the extracted verbage might not be valid, e.g. "ribu
-tiga"), but it's simple and fast.
+of words. It's not perfect (improper verbage might be allowed, e.g. "dua ribu
+tiga juta"), but it's convenient.
+
+Currently only multipliers up to trillions ("triliun") are recognized. Bigger
+multipliers are usually only found in scientific text.
 
 =head1 SEE ALSO
 
@@ -375,19 +455,31 @@ L<Lingua::ID::Nums2Words>
 
 L<Parse::Number::ID> is used to parse numbers in the verbage.
 
+=head1 HOMEPAGE
+
+Please visit the project's homepage at L<https://metacpan.org/release/Lingua-ID-Words2Nums>.
+
+=head1 SOURCE
+
+Source repository is at L<https://github.com/sharyanto/perl-Lingua-ID-Words2Nums>.
+
+=head1 BUGS
+
+Please report any bugs or feature requests on the bugtracker website L<https://rt.cpan.org/Public/Dist/Display.html?Name=Lingua-ID-Words2Nums>
+
+When submitting a bug or request, please include a test-file or a
+patch to an existing test-file that illustrates the bug or desired
+feature.
+
 =head1 AUTHOR
 
-Steven Haryanto <stevenharyanto@gmail.com>
+perlancar <perlancar@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2012 by Steven Haryanto.
+This software is copyright (c) 2014 by perlancar@cpan.org.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
-

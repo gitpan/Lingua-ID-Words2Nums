@@ -2,7 +2,8 @@ NAME
     Lingua::ID::Words2Nums - Convert Indonesian verbage to number
 
 VERSION
-    version 0.15
+    This document describes version 0.16 of Lingua::ID::Words2Nums (from
+    Perl distribution Lingua-ID-Words2Nums), released on 2014-09-28.
 
 SYNOPSIS
      use Lingua::ID::Words2Nums qw(words2nums words2nums_simple);
@@ -19,24 +20,80 @@ DESCRIPTION
     They are the counterpart of Lingua::ID::Nums2Words's nums2words and
     nums2words_simple.
 
-VARIABLES
+FUNCTIONS
+  words2nums(@args) -> any
+    Convert Indonesian verbage to number.
+
+    Parse Indonesian verbage and return number, or undef if failed (unknown
+    verbage or 'syntax error'). In English, this is equivalent to converting
+    "one hundred and twenty three" to 123. Currently can handle real numbers
+    in normal and scientific form in the order of hundreds of trillions.
+
+    Will produce unexpected result if you feed it stupid verbage.
+
+    Arguments ('*' denotes required arguments):
+
+    *   str* => *str*
+
+        The verbage to convert.
+
+    Return value:
+
+     (any)
+
+  words2nums_simple(@args) -> any
+    Like words2nums, but can only parse sequence of digits.
+
+    In English, this is equivalent to converting "one two three" to 123.
+
+    Will produce unexpected result if you feed it stupid verbage.
+
+    Arguments ('*' denotes required arguments):
+
+    *   str* => *str*
+
+        The verbage to convert.
+
+    Return value:
+
+     (any)
+
+EXPORTS
     None are exported by default, but they are exportable.
 
-  $Pat (REGEX)
+  $Pat (regex)
     A regex for quickly matching/extracting verbage from text; it looks for
-    a string of words. It's not perfect (the extracted verbage might not be
-    valid, e.g. "ribu tiga"), but it's simple and fast.
+    a string of words. It's not perfect (improper verbage might be allowed,
+    e.g. "dua ribu tiga juta"), but it's convenient.
+
+    Currently only multipliers up to trillions ("triliun") are recognized.
+    Bigger multipliers are usually only found in scientific text.
 
 SEE ALSO
     Lingua::ID::Nums2Words
 
     Parse::Number::ID is used to parse numbers in the verbage.
 
+HOMEPAGE
+    Please visit the project's homepage at
+    <https://metacpan.org/release/Lingua-ID-Words2Nums>.
+
+SOURCE
+    Source repository is at
+    <https://github.com/sharyanto/perl-Lingua-ID-Words2Nums>.
+
+BUGS
+    Please report any bugs or feature requests on the bugtracker website
+    <https://rt.cpan.org/Public/Dist/Display.html?Name=Lingua-ID-Words2Nums>
+
+    When submitting a bug or request, please include a test-file or a patch
+    to an existing test-file that illustrates the bug or desired feature.
+
 AUTHOR
-    Steven Haryanto <stevenharyanto@gmail.com>
+    perlancar <perlancar@cpan.org>
 
 COPYRIGHT AND LICENSE
-    This software is copyright (c) 2012 by Steven Haryanto.
+    This software is copyright (c) 2014 by perlancar@cpan.org.
 
     This is free software; you can redistribute it and/or modify it under
     the same terms as the Perl 5 programming language system itself.
